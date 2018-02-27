@@ -14,7 +14,7 @@ default: $(JULIA_BUILD_MODE) # contains either "debug" or "release"
 all: debug release
 
 # sort is used to remove potential duplicates
-DIRS := $(sort $(build_bindir) $(build_depsbindir) $(build_libdir) $(build_private_libdir) $(build_libexecdir) $(build_includedir) $(build_includedir)/julia $(build_sysconfdir)/julia $(build_datarootdir)/julia $(build_datarootdir)/julia/site $(build_man1dir) $(build_docdir))
+DIRS := $(sort $(build_bindir) $(build_depsbindir) $(build_libdir) $(build_private_libdir) $(build_libexecdir) $(build_includedir) $(build_includedir)/julia $(build_sysconfdir)/julia $(build_datarootdir)/julia $(build_datarootdir)/julia/site $(build_man1dir))
 ifneq ($(BUILDROOT),$(JULIAHOME))
 BUILDDIRS := $(BUILDROOT) $(addprefix $(BUILDROOT)/,base src ui doc deps test test/embedding test/perf)
 BUILDDIRMAKE := $(addsuffix /Makefile,$(BUILDDIRS))
@@ -56,11 +56,6 @@ julia_flisp.boot.inc.phony: julia-deps
 $(BUILDROOT)/doc/_build/html/en/index.html: $(shell find $(BUILDROOT)/base $(BUILDROOT)/doc \( -path $(BUILDROOT)/doc/_build -o -path $(BUILDROOT)/doc/deps -o -name *_constants.jl -o -name *_h.jl -o -name version_git.jl \) -prune -o -type f -print)
 	@$(MAKE) docs
 
-# doc needs to live under $(build_docdir), not under $(build_datarootdir)/julia/
-CLEAN_TARGETS += clean-docdir
-clean-docdir:
-	@-rm -fr $(abspath $(build_docdir))
-
 julia-symlink: julia-ui-$(JULIA_BUILD_MODE)
 ifneq ($(OS),WINNT)
 ifndef JULIA_VAGRANT_BUILD
@@ -83,7 +78,7 @@ julia-src-release julia-src-debug : julia-src-% : julia-deps julia_flisp.boot.in
 julia-ui-release julia-ui-debug : julia-ui-% : julia-src-%
 	@$(MAKE) $(QUIET_MAKE) -C $(BUILDROOT)/ui julia-$*
 
-julia-base-compiler : julia-base julia-ui-$(JULIA_BUILD_MODE) $(build_docdir)
+julia-base-compiler : julia-base julia-ui-$(JULIA_BUILD_MODE)
 	@$(MAKE) $(QUIET_MAKE) -C $(BUILDROOT) $(build_private_libdir)/basecompiler.ji JULIA_BUILD_MODE=$(JULIA_BUILD_MODE)
 
 julia-sysimg-release : julia-base-compiler julia-ui-release
@@ -345,7 +340,6 @@ endif
 	# Copy in all .jl sources as well
 	cp -R -L $(build_datarootdir)/julia $(DESTDIR)$(datarootdir)/
 	# Copy documentation
-	cp -R -L $(build_docdir)/* $(DESTDIR)$(docdir)/
 	cp -R -L $(BUILDROOT)/doc/_build/html $(DESTDIR)$(docdir)/
 	# Remove perf suite
 	-rm -rf $(DESTDIR)$(datarootdir)/julia/test/perf/
