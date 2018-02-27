@@ -83,7 +83,7 @@ julia-src-release julia-src-debug : julia-src-% : julia-deps julia_flisp.boot.in
 julia-ui-release julia-ui-debug : julia-ui-% : julia-src-%
 	@$(MAKE) $(QUIET_MAKE) -C $(BUILDROOT)/ui julia-$*
 
-julia-base-compiler : julia-base julia-ui-$(JULIA_BUILD_MODE)
+julia-base-compiler : julia-base julia-ui-$(JULIA_BUILD_MODE) $(build_docdir)
 	@$(MAKE) $(QUIET_MAKE) -C $(BUILDROOT) $(build_private_libdir)/basecompiler.ji JULIA_BUILD_MODE=$(JULIA_BUILD_MODE)
 
 julia-sysimg-release : julia-base-compiler julia-ui-release
